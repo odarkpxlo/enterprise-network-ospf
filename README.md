@@ -75,7 +75,7 @@ OSPF-learned networks were present in the routing tables with the expected admin
 
 The OSPF interface configuration and routing table were also reviewed during troubleshooting.
 
-![OSPF Routing](OSPF-routing.jpg)
+![OSPF Routing](OSPF-routing-intf.jpg)
 
 ## OSPF Cost
 
