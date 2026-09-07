@@ -1,18 +1,16 @@
 # Enterprise Network Routing with OSPF
 
-## Project Overview
+## Overview
 
-This project demonstrates the design and implementation of a routed enterprise network using Cisco Packet Tracer.
+This lab is a small enterprise-style routed network built in Cisco Packet Tracer.
 
-The main objective was to build a multi-router network, configure IP addressing and routing, implement OSPF as a dynamic routing protocol, and verify end-to-end connectivity.
+The network consists of three routers connecting three separate LANs. Static routing was initially configured to verify the IP addressing and Layer 3 connectivity. The network was then migrated to OSPF for dynamic route exchange.
+
+The lab also covers OSPF Router ID configuration, passive interfaces, OSPF cost manipulation, and link-failure testing.
 
 ## Network Topology
 
-```text
-PC1 ── SW1 ── R1 ── R2 ── SW2 ── PC2
-               │
-               R3 ── SW3 ── PC3
-```
+![Network Topology](topology.jpg)
 
 ## IP Addressing
 
@@ -34,58 +32,122 @@ PC1 ── SW1 ── R1 ── R2 ── SW2 ── PC2
 | PC2    | 192.168.20.10/24 | 192.168.20.1    |
 | PC3    | 192.168.30.10/24 | 192.168.30.1    |
 
-## Routing Implementation
+## Routing
 
-The project was first configured using static routes to verify basic Layer 3 connectivity.
+### Initial Static Routing
 
-After confirming connectivity, the static routes were removed and OSPF was implemented using:
+Static routes were configured first to verify basic Layer 3 connectivity between the three LANs.
+
+After end-to-end connectivity was confirmed, the static routes were removed.
+
+### OSPF Configuration
+
+OSPF was then deployed across the routed links using:
 
 * OSPF Process ID: `1`
 * Area: `0`
-* Manual Router IDs:
+* R1 Router ID: `1.1.1.1`
+* R2 Router ID: `2.2.2.2`
+* R3 Router ID: `3.3.3.3`
 
-  * R1: `1.1.1.1`
-  * R2: `2.2.2.2`
-  * R3: `3.3.3.3`
+The router-to-router interfaces participate in OSPF, while the LAN-facing interfaces are configured as passive interfaces.
 
-OSPF was configured on all router-to-router links and LAN networks.
+## OSPF Verification
 
-LAN-facing interfaces were configured as passive interfaces to prevent unnecessary OSPF neighbor formation toward end devices.
-
-## OSPF Cost
-
-OSPF interface cost was also tested to understand how path selection is affected by cost.
-
-The default path costs were restored after testing.
-
-This demonstrated how OSPF calculates the total path cost and selects the lowest-cost route.
-
-## Verification and Troubleshooting
-
-The following commands were used to verify the configuration and troubleshoot the network:
+OSPF neighbor relationships were verified using:
 
 ```text
 show ip ospf neighbor
-show ip ospf interface
+```
+
+The expected neighbor relationships were established in the `FULL` state.
+
+![OSPF Neighbors](OSPF-nghb.jpg)
+
+Routing information was verified using:
+
+```text
 show ip route ospf
 show ip route
 ```
 
-Connectivity was verified using end-to-end ICMP tests between all three LANs.
+OSPF-learned networks were present in the routing tables with the expected administrative distance and path cost.
 
-OSPF neighbor relationships were verified as `FULL`, and the expected OSPF routes were present in the routing tables.
+The OSPF interface configuration and routing table were also reviewed during troubleshooting.
 
-## Failure Detection and Reconvergence
+![OSPF Routing](OSPF-routing.jpg)
 
-An OSPF link failure was simulated by shutting down the R1-R2 interface.
+## OSPF Cost
 
-The OSPF neighbor relationship was removed and the affected routes were withdrawn from the routing table.
+OSPF path selection was tested by manually changing the interface cost on the R1-R2 link.
 
-After restoring the interface, OSPF re-established the neighbor relationship and learned the routes again.
+Example:
 
-> Note: This topology contains a single path between R1 and R3, so the failure test demonstrates OSPF failure detection and route reconvergence rather than true redundant-path failover.
+```text
+interface g0/1
+ ip ospf cost 50
+```
 
-## Technologies Used
+Increasing the interface cost changed the calculated cost of routes using that path.
+
+After testing, the interface was returned to its default OSPF cost.
+
+This test verified how OSPF uses cumulative path cost when selecting routes.
+
+## Link Failure Test
+
+To verify OSPF convergence, the R1-R2 link was intentionally shut down:
+
+```text
+interface g0/1
+ shutdown
+```
+
+The OSPF adjacency was removed and routes dependent on the failed path were withdrawn from the routing table.
+
+After restoring the interface:
+
+```text
+no shutdown
+```
+
+the OSPF adjacency returned to `FULL` and the routes were learned again.
+
+This test demonstrates OSPF failure detection and route reconvergence.
+
+> Note: The current topology has no redundant path between R1 and R3. Therefore, this test demonstrates failure detection and reconvergence, not true redundant-path failover.
+
+## Connectivity Verification
+
+End-to-end connectivity was tested between all three LANs using ICMP.
+
+The tests confirmed connectivity between:
+
+* PC1 → PC2
+* PC1 → PC3
+* PC2 → PC1
+* PC2 → PC3
+* PC3 → PC1
+* PC3 → PC2
+
+![End-to-End Connectivity](end-to-end.jpg)
+
+## Troubleshooting
+
+The following commands were used to verify and troubleshoot the routing environment:
+
+```text
+show ip interface brief
+show ip ospf neighbor
+show ip ospf interface
+show ip route
+show ip route ospf
+ping
+```
+
+The troubleshooting process included checking interface status, OSPF adjacency state, routing-table entries, OSPF cost, and end-to-end connectivity.
+
+## Technologies
 
 * Cisco Packet Tracer
 * Cisco IOS
@@ -94,26 +156,13 @@ After restoring the interface, OSPF re-established the neighbor relationship and
 * Static Routing
 * Dynamic Routing
 * ICMP
-* Layer 3 Troubleshooting
 
 ## Project Files
 
-* `enterprise-network-ospf.pkt` — Cisco Packet Tracer project
-* `topology.jpg` — Network topology
-* `OSPF-nghb.jpg` — OSPF neighbor verification
-* `OSPF-routing.jpg` — OSPF interface and routing verification
-* `end-to-end.jpg` — End-to-end connectivity tests
-
-## Key Learning Outcomes
-
-This project strengthened practical understanding of:
-
-* Static vs. dynamic routing
-* OSPF neighbor relationships
-* OSPF Router ID
-* OSPF Area 0
-* Passive interfaces
-* OSPF cost and path selection
-* Routing table verification
-* OSPF failure detection and reconvergence
-* Layer 3 troubleshooting
+| File                          | Description                             |
+| ----------------------------- | --------------------------------------- |
+| `enterprise-network-ospf.pkt` | Cisco Packet Tracer project             |
+| `topology.jpg`                | Network topology                        |
+| `OSPF-nghb.jpg`               | OSPF neighbor verification              |
+| `OSPF-routing.jpg`            | OSPF interface and routing verification |
+| `end-to-end.jpg`              | End-to-end connectivity tests           |
