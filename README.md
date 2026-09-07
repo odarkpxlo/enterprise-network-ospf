@@ -99,10 +99,10 @@ After restoring the interface, OSPF re-established the neighbor relationship and
 ## Project Files
 
 * `enterprise-network-ospf.pkt` — Cisco Packet Tracer project
-* `topology` — Network topology
-* `OSPF-nghb` — OSPF neighbor verification
-* `OSPF-routing` — OSPF interface and routing verification
-* `end-to-end` — End-to-end connectivity tests
+* `topology.jpg` — Network topology
+* `OSPF-nghb.jpg` — OSPF neighbor verification
+* `OSPF-routing.jpg` — OSPF interface and routing verification
+* `end-to-end.jpg` — End-to-end connectivity tests
 
 ## Key Learning Outcomes
 
